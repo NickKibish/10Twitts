@@ -9,12 +9,12 @@
         <scene sceneID="Rcs-RQ-jAV">
             <objects>
                 <tableViewController id="E1J-IJ-NI9" customClass="TwittsTable" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="147" sectionHeaderHeight="22" sectionFooterHeight="22" id="a3G-2o-xbk">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="166" sectionHeaderHeight="22" sectionFooterHeight="22" id="a3G-2o-xbk">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="Cell" rowHeight="147" id="6Q0-51-wB0" customClass="TwittCell">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="Cell" rowHeight="166" id="6Q0-51-wB0" customClass="TwittCell">
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="6Q0-51-wB0" id="DtB-RD-42C">
                                     <autoresizingMask key="autoresizingMask"/>
@@ -44,15 +44,25 @@
                                             </constraints>
                                         </imageView>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="Text" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="y7v-iN-W1D">
-                                            <rect key="frame" x="10" y="70" width="582" height="69"/>
+                                            <rect key="frame" x="10" y="71" width="582" height="87"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
+                                        <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="A1o-to-C5c">
+                                            <rect key="frame" x="552" y="37" width="40" height="30"/>
+                                            <state key="normal" title="Share">
+                                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                            </state>
+                                            <connections>
+                                                <action selector="share:" destination="6Q0-51-wB0" eventType="touchUpInside" id="UMZ-ze-fNB"/>
+                                            </connections>
+                                        </button>
                                     </subviews>
                                     <constraints>
                                         <constraint firstItem="r4H-PZ-87S" firstAttribute="top" secondItem="DtB-RD-42C" secondAttribute="topMargin" constant="2" id="2gP-nd-Nk3"/>
                                         <constraint firstItem="y7v-iN-W1D" firstAttribute="trailing" secondItem="DtB-RD-42C" secondAttribute="trailingMargin" id="8DK-ds-6KN"/>
+                                        <constraint firstItem="A1o-to-C5c" firstAttribute="trailing" secondItem="DtB-RD-42C" secondAttribute="trailingMargin" id="DDs-pu-cKn"/>
                                         <constraint firstItem="r4H-PZ-87S" firstAttribute="leading" secondItem="DtB-RD-42C" secondAttribute="leadingMargin" constant="2" id="FVe-9p-dQn"/>
                                         <constraint firstItem="y7v-iN-W1D" firstAttribute="leading" secondItem="DtB-RD-42C" secondAttribute="leadingMargin" constant="2" id="I4p-WH-Fzo"/>
                                         <constraint firstItem="50X-SB-NZm" firstAttribute="trailing" secondItem="DtB-RD-42C" secondAttribute="trailingMargin" id="d6P-zi-RQK"/>
@@ -74,12 +84,16 @@
                     </tableView>
                     <navigationItem key="navigationItem" id="cSI-NC-XUq">
                         <nil key="title"/>
-                        <barButtonItem key="rightBarButtonItem" systemItem="refresh" id="VoU-DA-Jyb"/>
+                        <barButtonItem key="rightBarButtonItem" systemItem="refresh" id="VoU-DA-Jyb">
+                            <connections>
+                                <action selector="refresh:" destination="E1J-IJ-NI9" id="gXv-Ug-e6W"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HJn-7W-Vo1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1295" y="384"/>
+            <point key="canvasLocation" x="1295" y="383"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="Tdi-0o-TBJ">

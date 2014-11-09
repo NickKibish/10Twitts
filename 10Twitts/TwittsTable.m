@@ -13,6 +13,7 @@
 static NSString *_twitterDisplayName = @"NickKibish";
 @interface TwittsTable ()
 @property (strong, nonatomic) NSArray *statuses;
+@property (assign, nonatomic) NSInteger rowsCount;
 @end
 
 @implementation TwittsTable
@@ -24,8 +25,13 @@ static NSString *_twitterDisplayName = @"NickKibish";
     [twitter getUserTimelineWithScreenName:_twitterDisplayName
                                      count:10
                               successBlock:^(NSArray *statuses){
-                                  self.statuses = statuses;
-                                  [self.tableView reloadData];
+                                  if (self.statuses.count) {
+                                      self.statuses = statuses;
+                                      [self uploadTable];
+                                  } else {
+                                      self.statuses = statuses;
+                                      [self.tableView reloadData];
+                                  }
                               }errorBlock:^(NSError *error){
                                   UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
                                                                                   message:[error localizedDescription]
@@ -36,8 +42,37 @@ static NSString *_twitterDisplayName = @"NickKibish";
                               }];
 }
 
+- (void)uploadTable
+{
+    NSMutableArray *indexPathes = [NSMutableArray array];
+    for (int i = 0; i < self.statuses.count; i++) {
+        [indexPathes insertObject:[NSIndexPath indexPathForRow:i inSection:0] atIndex:0];
+    }
+    [self.tableView reloadRowsAtIndexPaths:indexPathes withRowAnimation:UITableViewRowAnimationFade];
+}
+
+- (void)saveToDatabase
+{
+    AppDelegate *delegate = [AppDelegate delegate];
+    NSPersistentStoreCoordinator *coordinator = delegate.persistentStoreCoordinator;
+    
+}
+
+- (IBAction)refresh:(id)sender
+{
+    [self loadTwitts];
+}
+
+- (NSArray *)statuses
+{
+    if (!_statuses)
+        _statuses = [NSArray array];
+    return _statuses;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
+    _rowsCount = 0;
 }
 
 - (void)didReceiveMemoryWarning {
@@ -49,7 +84,7 @@ static NSString *_twitterDisplayName = @"NickKibish";
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return self.statuses.count;
+    return [self.statuses count];
 }
 
 - (void)loadImage:(UIImageView *)imageView URL:(NSURL *)URL
@@ -89,13 +124,17 @@ static NSString *_twitterDisplayName = @"NickKibish";
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     TwittCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
-    if (!cell)
+    if (!cell) {
         cell = [[TwittCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"Cell"];
+    }
+    cell.parentTable = self;
     
     NSDictionary *status = [self.statuses objectAtIndex:indexPath.row];
     NSString *tweetText = [status valueForKey:@"text"];
     NSNumber *isRetweeted = [status valueForKey:@"retweeted"];
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     cell.userAvatal.image = nil;
+    
     if ([isRetweeted boolValue]) {
         AppDelegate *appDelegate = [AppDelegate delegate];
         STTwitterAPI *twitter = appDelegate.twitter;
@@ -138,12 +177,63 @@ static NSString *_twitterDisplayName = @"NickKibish";
     return result;
 }
 
-- (void)parseRetweetedTwitt
-{
-    
-}
-
 @end
 
 @implementation TwittCell
+- (IBAction)share:(id)sender
+{
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Добавить фото?"
+                                                    message:@"Хотите загрузить фото из библиотеки?"
+                                                   delegate:self
+                                          cancelButtonTitle:@"Нет"
+                                          otherButtonTitles:@"Да", nil];
+    [alert show];
+}
+
+#pragma mark - Alert View Delegate
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (buttonIndex) {
+        UIImagePickerController *picker = [[UIImagePickerController alloc] init];
+        picker.delegate = self;
+        picker.allowsEditing = YES;
+        picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        [picker setModalPresentationStyle:UIModalPresentationPageSheet];
+        
+        [self.parentTable presentViewController:picker animated:YES completion:NULL];
+    } else {
+        [self shareTweetWithImage:nil];
+    }
+}
+
+- (void)shareTweetWithImage:(UIImage *)image
+{
+    NSMutableArray *arr = [NSMutableArray arrayWithObject:self.twittLabel.text];
+    if (image)
+        [arr insertObject:image atIndex:1];
+    UIActivityViewController *activityView = [[UIActivityViewController alloc] initWithActivityItems:arr
+                                                                               applicationActivities:nil];
+    activityView.popoverPresentationController.sourceView = self.twittLabel;
+    [self.parentTable presentViewController:activityView
+                                   animated:YES
+                                 completion:nil];
+}
+
+#pragma mark - Image Picker Controller Delegate
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
+{
+    UIImage *chosenImage = info[UIImagePickerControllerEditedImage];
+    
+    [picker dismissViewControllerAnimated:YES completion:^{
+        [self shareTweetWithImage:chosenImage];
+    }];
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+{
+    [picker dismissViewControllerAnimated:YES completion:^{
+        [self shareTweetWithImage:nil];
+    }];
+}
+
 @end
