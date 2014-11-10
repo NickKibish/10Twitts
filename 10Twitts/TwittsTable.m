@@ -6,11 +6,13 @@
 //  Copyright (c) 2014 Nick Kibish. All rights reserved.
 //
 
+#define TweetColor [UIColor colorWithRed:83./255 green:173./255 blue:233./255 alpha:1.0]
+
 #import "TwittsTable.h"
 #import "STTwitter.h"
 #import "AppDelegate.h"
 
-static NSString *_twitterDisplayName = @"NickKibish";
+static NSString *_twitterDisplayName = @"pinkfloyd";
 @interface TwittsTable ()
 @property (strong, nonatomic) NSArray *statuses;
 @property (assign, nonatomic) NSInteger rowsCount;
@@ -32,13 +34,13 @@ static NSString *_twitterDisplayName = @"NickKibish";
                                       self.statuses = statuses;
                                       [self.tableView reloadData];
                                   }
+                                  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                                      [self saveToDatabase];
+                                  });
+                                  [self.refreshControl endRefreshing];
                               }errorBlock:^(NSError *error){
-                                  UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
-                                                                                  message:[error localizedDescription]
-                                                                                 delegate:nil
-                                                                        cancelButtonTitle:@"Ok"
-                                                                        otherButtonTitles:nil];
-                                  [alert show];
+                                  [self loadFromDatabase];
+                                  [self.refreshControl endRefreshing];
                               }];
 }
 
@@ -54,8 +56,67 @@ static NSString *_twitterDisplayName = @"NickKibish";
 - (void)saveToDatabase
 {
     AppDelegate *delegate = [AppDelegate delegate];
-    NSPersistentStoreCoordinator *coordinator = delegate.persistentStoreCoordinator;
+    NSManagedObjectContext *context = [delegate managedObjectContext];
+    NSFetchRequest *allTweets = [[NSFetchRequest alloc] init];
+    [allTweets setEntity:[NSEntityDescription entityForName:@"Twitts" inManagedObjectContext:context]];
+    [allTweets setIncludesPropertyValues:NO];
     
+    NSError * error = nil;
+    NSArray * tweets = [context executeFetchRequest:allTweets error:&error];
+    for (NSManagedObject *tweet in tweets) {
+        [context deleteObject:tweet];
+    }
+    NSError *saveError = nil;
+    [context save:&saveError];
+    NSError *err;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:self.statuses
+                                                       options:NSJSONWritingPrettyPrinted
+                                                         error:&err];
+    NSString *jsonSTR = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    
+    if ([jsonData length] > 0 && err == nil){
+        NSLog(@"Successfully serialized the dictionary into data = %@",
+              jsonData);
+    }
+    else if ([jsonData length] == 0 && err == nil){
+        NSLog(@"No data was returned after serialization.");
+    }
+    else if (err != nil){
+        NSLog(@"An error happened = %@", err);
+    }
+    
+    
+    NSEntityDescription *tweetData = [NSEntityDescription entityForName:@"Twitts"
+                                                 inManagedObjectContext:context];
+    NSManagedObject *tweetManagObj = [NSEntityDescription insertNewObjectForEntityForName:[tweetData name] inManagedObjectContext:context];
+    [tweetManagObj setValue:jsonSTR forKey:@"json"];
+    NSLog(@"JSON String:%@", jsonSTR);
+    NSError *savingError;
+    [context save:&savingError];
+    if (savingError) {
+        NSLog(@"Saving error: %@", savingError);
+    }
+}
+
+- (void)loadFromDatabase
+{
+    AppDelegate *delegate = [AppDelegate delegate];
+    NSManagedObjectContext *context = [delegate managedObjectContext];
+    NSFetchRequest *allTweets = [[NSFetchRequest alloc] init];
+    [allTweets setEntity:[NSEntityDescription entityForName:@"Twitts" inManagedObjectContext:context]];
+    [allTweets setIncludesPropertyValues:NO];
+    
+    NSError * error = nil;
+    NSArray * tweets = [context executeFetchRequest:allTweets error:&error];
+    NSManagedObject *tweet = [tweets firstObject];
+    NSString *jsonSTR = [tweet valueForKey:@"json"];
+    NSLog(@"JSON %@", jsonSTR);
+    NSData *data = [jsonSTR dataUsingEncoding:NSUTF8StringEncoding];
+    NSArray *jsonObject = [NSJSONSerialization JSONObjectWithData:data
+                                                          options:NSJSONReadingAllowFragments
+                                                            error:&error];
+    self.statuses = jsonObject;
+    [self.tableView reloadData];
 }
 
 - (IBAction)refresh:(id)sender
@@ -72,7 +133,14 @@ static NSString *_twitterDisplayName = @"NickKibish";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    _rowsCount = 0;
+
+    
+    self.refreshControl = [[UIRefreshControl alloc] init];
+    self.refreshControl.backgroundColor = TweetColor;
+    self.refreshControl.tintColor = [UIColor whiteColor];
+    [self.refreshControl addTarget:self
+                            action:@selector(loadTwitts)
+                  forControlEvents:UIControlEventValueChanged];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -157,7 +225,7 @@ static NSString *_twitterDisplayName = @"NickKibish";
         NSURL *url = [NSURL URLWithString:imageURL];
         [self loadImage:cell.userAvatal URL:url];
     }
-    
+    cell.dateLabel.text = [status valueForKey:@"created_at"];
     return cell;
 }
 

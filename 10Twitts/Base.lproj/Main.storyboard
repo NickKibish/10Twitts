@@ -5,7 +5,7 @@
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
-        <!--Twitts Table-->
+        <!--@NickKibish-->
         <scene sceneID="Rcs-RQ-jAV">
             <objects>
                 <tableViewController id="E1J-IJ-NI9" customClass="TwittsTable" sceneMemberID="viewController">
@@ -82,8 +82,7 @@
                             <outlet property="delegate" destination="E1J-IJ-NI9" id="OaA-aa-iLw"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" id="cSI-NC-XUq">
-                        <nil key="title"/>
+                    <navigationItem key="navigationItem" title="@NickKibish" id="cSI-NC-XUq">
                         <barButtonItem key="rightBarButtonItem" systemItem="refresh" id="VoU-DA-Jyb">
                             <connections>
                                 <action selector="refresh:" destination="E1J-IJ-NI9" id="gXv-Ug-e6W"/>
@@ -103,6 +102,12 @@
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="rsZ-PA-qSQ">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <color key="barTintColor" red="0.32549019607843138" green="0.67843137254901964" blue="0.9137254901960784" alpha="1" colorSpace="calibratedRGB"/>
+                        <textAttributes key="titleTextAttributes">
+                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                            <color key="textShadowColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        </textAttributes>
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>
