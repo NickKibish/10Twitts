@@ -133,7 +133,7 @@ static NSString *_twitterDisplayName = @"pinkfloyd";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
+    self.navigationItem.title = [NSString stringWithFormat:@"@%@", _twitterDisplayName];
     
     self.refreshControl = [[UIRefreshControl alloc] init];
     self.refreshControl.backgroundColor = TweetColor;
